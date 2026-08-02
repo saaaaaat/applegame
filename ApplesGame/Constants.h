@@ -18,5 +18,9 @@ namespace ApplesGame
 	const uint8_t MODE_INFINITE_APPLES = 1 << 1;
 	const uint8_t MODE_ACCELERATION = 1 << 2;
 	const uint8_t MODE_NO_ACCELERATION = 1 << 3;
+
+	const int LEADERBOARD_SIZE = 5;
+	const int MAX_SCORE = 200;
+	const int MIN_SCORE = 10;
 }
 

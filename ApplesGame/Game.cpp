@@ -4,7 +4,135 @@
 
 namespace ApplesGame
 {
+    void GenerateLeaderboard(Game& game)
+    {
+        game.leaderboard.clear();
+        game.leaderboardMap.clear();
+
+        // список
+        std::string botNames[] = {"Alice", "Bob", "Carol", "Dave", "Eve" ,"Frank", "Grace", "Henry", "Ivy", "Jack"};
+
+        //  4 записей со случайными именами и очками
+        for (int i = 0; i < LEADERBOARD_SIZE-1; ++i)
+        {
+            LeaderboardEntry record;
+            record.name = botNames[i % 10];
+            record.score = rand() % (MAX_SCORE - MIN_SCORE + 1) + MIN_SCORE;
+
+            game.leaderboard.push_back(record);
+
+            
+            game.leaderboardMap[record.name] = record.score;
+        }
+
+        game.isLeaderboardGenerated = true;
+    }
     
+
+   
+    void SortLeaderboard(Game&game)
+    {
+        
+        for (int i = 1; i < (int)game.leaderboard.size(); ++i)
+        {
+            LeaderboardEntry key = game.leaderboard[i];
+            int j = i - 1;
+
+           
+            while (j >= 0 && game.leaderboard[j].score < key.score)
+            {
+                game.leaderboard[j + 1] = game.leaderboard[j];
+                j=j-1;
+            }
+            game.leaderboard[j + 1] = key;
+
+
+        }
+    }
+    
+    void UpdateLeaderboard(Game& game)
+    {
+        
+        game.leaderboardMap["Player"] = game.numEatenApples;
+
+      
+        game.leaderboard.clear();
+
+      
+        for (const auto& pair : game.leaderboardMap)
+        {
+            LeaderboardEntry record;
+            record.name = pair.first;
+            record.score = pair.second;
+            game.leaderboard.push_back(record);
+        }
+
+       
+        SortLeaderboard(game);
+
+        // оставляем только 5
+        if (game.leaderboard.size() > LEADERBOARD_SIZE)
+        {
+            game.leaderboard.resize(LEADERBOARD_SIZE);
+        }
+    }
+
+  
+    void DrawLeaderboard(Game& game, sf::RenderWindow& window)
+    {
+        std::string text = "   LEADERBOARD    \n";
+        for (int i = 0; i < LEADERBOARD_SIZE;++i)
+        {
+            text += std::to_string(i + 1) + ". ";
+            text += game.leaderboard[i].name;
+
+            int dotsCount = 20 - game.leaderboard[i].name.length();
+            for (int j = 0; j < dotsCount;++j)
+            {
+                text += "_";
+
+            }
+            text += " " + std::to_string(game.leaderboard[i].score) + "\n";
+        }
+        text += "\n              \n";
+        text += " Press R to restart";
+
+        game.leaderboardText.setString(text);
+        game.leaderboardText.setFont(game.font);
+        game.leaderboardText.setCharacterSize(24);
+        game.leaderboardText.setFillColor(sf::Color::Yellow);
+        game.leaderboardText.setPosition(SCREEN_WIDTH / 2.f - 200.f, SCREEN_HEIGHT / 2.f - 150.f);
+        window.draw(game.leaderboardText);
+    }
+
+    void RestartGame(Game& game)
+    {
+        game.isGameFinished = false;
+        game.isLeaderboardShown = false;
+        game.timeSinceGameFinish = 0.f;
+
+
+        if (game.apples != nullptr)
+        {
+            delete[] game.apples;
+            game.apples = nullptr;
+        }
+
+        game.numApples = rand() % 81 + 10;
+        game.apples = new Apple[game.numApples];
+        assert(game.apples != nullptr);
+
+        for (int i = 0; i < game.numApples;++i)
+        {
+            InitApple(game.apples[i], game);
+        }
+        game.applesCountText.setString("Apples on field :" + std::to_string(game.numApples));
+
+        StartPlayingState(game);
+
+    }
+
+
     void UpdateModeSelection(Game& game)
     {
         //клавиши для выбора режима " конечные яблоки"
@@ -144,6 +272,8 @@ namespace ApplesGame
         game.isGameFinished = false;
         game.timeSinceGameFinish = 0;
 
+        
+
         // обновление текстов
         game.scoreText.setString("Apples eaten: " + std::to_string(game.numEatenApples));
         game.applesCountText.setString("Apples on field: " + std::to_string(game.numApples));
@@ -224,26 +354,43 @@ namespace ApplesGame
     void StartGameoverState(Game& game)
     {
         game.isGameFinished = true;
+        game.isGameOverShow = true;
         game.timeSinceGameFinish = 0.f;
         game.gameOverSound.play();
         game.gameOverScoreText.setString("Your scores: " + std::to_string(game.numEatenApples));
+
+        UpdateLeaderboard(game);
+      
     }
 
     void UpdateGameoverState(Game& game, float deltaTime)
     {
-        if (game.timeSinceGameFinish <= PAUSE_LENGTH)
+        
+        if ( game.isLeaderboardShown && sf::Keyboard::isKeyPressed(sf::Keyboard::R))
         {
+          
+            sf::sleep(sf::milliseconds(300));
+            RestartGame(game);
+            return;
+        }
+
+        if (game.isGameOverShow)
+        {
+
             game.timeSinceGameFinish += deltaTime;
             game.background.setFillColor(sf::Color::Red);
-        }
-        else
-        {
-            game.background.setFillColor(sf::Color::Black);
 
-            // возвращаемся к выбору режима
-            game.isModeSelection = true;
-            game.isGameFinished = false;
+
+            if (game.timeSinceGameFinish >= PAUSE_LENGTH)
+            {
+                game.isGameOverShow = false;
+                game.isLeaderboardShown = true;
+                game.background.setFillColor(sf::Color::Black);
+
+            }
+            return;
         }
+       
     }
 
     void InitGame(Game& game)
@@ -262,6 +409,11 @@ namespace ApplesGame
         //  режим по умолчанию
         game.isModeSelection = true;
         game.gameModeMask = MODE_INFINITE_APPLES | MODE_ACCELERATION;
+        game.isLeaderboardShown = false;
+        game.isLeaderboardGenerated = false;
+
+        GenerateLeaderboard(game);
+        SortLeaderboard(game);
 
         // инициализация игрока
         InitPlayer(game.player, game);
@@ -313,6 +465,11 @@ namespace ApplesGame
         game.modeSelectionText.setCharacterSize(24);
         game.modeSelectionText.setFillColor(sf::Color::White);
 
+        //генерируем таблицу
+        game.leaderboardText.setFont(game.font);
+        game.leaderboardText.setCharacterSize(24);
+        game.leaderboardText.setFillColor(sf::Color::White);
+
      
         game.apples = nullptr;
         game.numApples = 0;
@@ -337,12 +494,22 @@ namespace ApplesGame
 
     void DrawGame(Game& game, sf::RenderWindow& window)
     {
+
         if (game.isModeSelection)
         {
             // отрисовка режимов
             DrawModeSelection(game, window);
             return;
         }
+
+        if (game.isLeaderboardShown)
+        {
+            window.draw(game.background);
+            DrawLeaderboard(game, window);
+            window.draw(game.restartHintText);
+            return;
+        }
+
 
         // отрисовка фона
         window.draw(game.background);
@@ -361,15 +528,15 @@ namespace ApplesGame
         }
 
         // отрисовка текстов
-        if (!game.isGameFinished)
+        if (game.isGameOverShow)
+        {
+            window.draw(game. gameOverText);
+            window.draw(game.gameOverScoreText);
+        }
+        else if (!game.isGameFinished && !game.isLeaderboardShown)
         {
             window.draw(game.scoreText);
             window.draw(game.applesCountText);
-        }
-        else
-        {
-            window.draw(game.gameOverText);
-            window.draw(game.gameOverScoreText);
         }
     }
 
