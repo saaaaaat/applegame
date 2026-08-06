@@ -314,6 +314,12 @@ namespace ApplesGame
                     game.numApples = game.numApples -1;
                     game.applesCountText.setString("Apples on field: " + std::to_string(game.numApples));
                     i = i -1;
+
+                    if (game.numApples == 0)
+                    {
+                        StartGameoverState(game);
+                        return;
+                    }
                 }
                 //  "бесконечные яблоки"
                 else if (game.gameModeMask & MODE_INFINITE_APPLES)

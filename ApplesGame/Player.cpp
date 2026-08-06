@@ -71,10 +71,9 @@ namespace ApplesGame
 
 	void DrawPlayer(Player& player, sf::RenderWindow& window)
 	{
-		player.sprite.setPosition(player.position.x, player.position.y);
-		window.draw(player.sprite);
+		
 
-		// orient player sprite 
+		// ориентация спрайта
 		if (player.direction == PlayerDirection::Left)
 		{
 			SetSpriteSize(player.sprite, -PLAYER_SIZE, PLAYER_SIZE);
@@ -85,6 +84,9 @@ namespace ApplesGame
 			SetSpriteSize(player.sprite, PLAYER_SIZE, PLAYER_SIZE);
 			player.sprite.setRotation((float)player.direction * -90.f);
 		}
+		// его отрисовка
+		player.sprite.setPosition(player.position.x, player.position.y);
+		window.draw(player.sprite);
 	}
 }
 
