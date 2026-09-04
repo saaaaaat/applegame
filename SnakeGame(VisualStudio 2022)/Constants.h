@@ -23,5 +23,10 @@ namespace SnakeGame
     const int INITIAL_SNAKE_SIZE = 3;
     const float MOVE_INTERVAL = 0.15f;  
 
+    // УРОВНИ СКОРОСТЬ
+    const float EASY_SPEED = 0.2f;
+    const float NORMAL_SPEED = 0.13f;
+    const float HARD_SPEED = 0.08f;
+
     
 }

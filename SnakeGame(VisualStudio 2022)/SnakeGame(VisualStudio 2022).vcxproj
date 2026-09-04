@@ -20,12 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Apple.cpp" />
+    <ClCompile Include="Difficulty.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameMain.cpp" />
-    <ClCompile Include="Math.cpp">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\user\Downloads\xyz-cpp-course-lesson-1-4-4\xyz-cpp-course-lesson-1-4-4\SFML\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\user\Downloads\xyz-cpp-course-lesson-1-4-4\xyz-cpp-course-lesson-1-4-4\SFML\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
+    <ClCompile Include="Leaderboard.cpp" />
+    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Mods.cpp" />
     <ClCompile Include="Snake.cpp" />
   </ItemGroup>
   <ItemGroup>

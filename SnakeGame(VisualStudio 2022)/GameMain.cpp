@@ -21,7 +21,7 @@ int main()
     {
        
         if (game.isMenuActive &&
-            game.selectedMenuItem == 3 &&
+            game.selectedMenuItem == 4 &&
             sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
         {
             window.close();
